@@ -2,8 +2,7 @@ package org.poc.migration.service;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumWriter;
@@ -15,13 +14,10 @@ import org.poc.migration.repository.DepartmentRepository;
 import org.poc.migration.repository.HiredEmployeeRepository;
 import org.poc.migration.repository.JobRepository;
 import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.SeekableFileInput;
-import org.apache.avro.specific.SpecificDatumReader;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -63,13 +59,14 @@ public class BackupService {
     public String restoreData(String tableName) throws IOException {
         switch (tableName.toLowerCase()) {
             case "hired_employee":
-                restoreFromAvro("hired_employees_backup.avro", HiredEmployee.class, hiredEmployeeRepository);
+                //restoreFromAvro("hired_employees_backup.avro", hiredEmployeeRepository, HiredEmployee.class);
                 break;
             case "department":
-                restoreFromAvro("deparments_backup.avro", Department.class, departmentRepository);
+
+                restoreFromDepartmentAvro("deparments_backup.avro", departmentRepository);
                 break;
             case "job":
-                restoreFromAvro("jobs_backup.avro", Job.class, jobRepository);
+                restoreFromJobsAvro("jobs_backup.avro", jobRepository);
                 break;
             default:
                 throw new IllegalArgumentException("Table not found: " + tableName);
@@ -77,15 +74,49 @@ public class BackupService {
         return "Backup de la entidad: " + tableName + " restaurado";
     }
 
-    private <T> void restoreFromAvro(String fileName, Class<T> clazz, org.springframework.data.jpa.repository.JpaRepository<T, ?> repository) throws IOException {
+    private <T> void restoreFromDepartmentAvro(String fileName, DepartmentRepository repository) throws IOException {
         File file = new File("C:/Backup/" + fileName);
-        List<T> records = new ArrayList<>();
-        SpecificDatumReader<T> datumReader = new SpecificDatumReader<>(clazz);
-        try (DataFileReader<T> dataFileReader = new DataFileReader<>(new SeekableFileInput(file), datumReader)) {
+        //SpecificDatumReader<T> datumReader = (SpecificDatumReader<T>) new SpecificDatumReader<>(clazz);
+        GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
+
+        try (DataFileReader<GenericRecord> dataFileReader = new DataFileReader<>(file, datumReader)) {
             while (dataFileReader.hasNext()) {
-                records.add(dataFileReader.next());
+                GenericRecord record = dataFileReader.next();
+                Department department = new Department();
+
+                // Extraer datos del GenericRecord
+                if (record.get("id") != null) {
+                    department.setId((Long) record.get("id"));
+                }
+                if (record.get("departmentName") != null) {
+                    department.setDepartmentName(record.get("departmentName").toString());
+                }
+
+                repository.save(department);
             }
         }
-        repository.saveAll(records);
+    }
+
+    private <T> void restoreFromJobsAvro(String fileName, JobRepository repository) throws IOException {
+        File file = new File("C:/Backup/" + fileName);
+        //SpecificDatumReader<T> datumReader = (SpecificDatumReader<T>) new SpecificDatumReader<>(clazz);
+        GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
+
+        try (DataFileReader<GenericRecord> dataFileReader = new DataFileReader<>(file, datumReader)) {
+            while (dataFileReader.hasNext()) {
+                GenericRecord record = dataFileReader.next();
+                Job job = new Job();
+
+                // Extraer datos del GenericRecord
+                if (record.get("id") != null) {
+                    job.setId((Long) record.get("id"));
+                }
+                if (record.get("jobName") != null) {
+                    job.setJobName(record.get("jobName").toString());
+                }
+
+                repository.save(job);
+            }
+        }
     }
 }

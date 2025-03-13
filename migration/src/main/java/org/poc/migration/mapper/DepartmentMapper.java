@@ -18,4 +18,11 @@ public class DepartmentMapper {
         departmentAvro.setDepartmentName(department.getDepartmentName());
         return departmentAvro;
     }
+
+    public static Department avroToEntity(DepartmentAvro departmentAvro) {
+        Department department = new Department();
+        department.setId(departmentAvro.getId());
+        department.setDepartmentName(departmentAvro.getDepartmentName());
+        return department;
+    }
 }
