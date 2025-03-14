@@ -9,7 +9,7 @@ import lombok.Data;
 @Entity
 @Table(name = "departments")
 public class Department {
-	@Id
-	private Long id;
-	private String departmentName;
+    @Id
+    private Long id;
+    private String departmentName;
 }

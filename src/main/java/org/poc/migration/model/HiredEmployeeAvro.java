@@ -3,8 +3,6 @@ package org.poc.migration.model;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecordBase;
 
-import java.time.LocalDateTime;
-
 public class HiredEmployeeAvro extends SpecificRecordBase {
     private Long id;
     private String name;

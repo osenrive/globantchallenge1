@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "hired_employees")
 public class HiredEmployee {
-	@Id
-	private Long id;
-	private String name;
-	private LocalDateTime dateTime;
-	private Long departmentId;
-	private Long jobId;
+    @Id
+    private Long id;
+    private String name;
+    private LocalDateTime dateTime;
+    private Long departmentId;
+    private Long jobId;
 }
