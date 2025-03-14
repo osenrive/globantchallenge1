@@ -26,12 +26,23 @@ La API expone endpoints para consultar los reportes para el usuario final.
 
 - Clonar el repositorio git clone https://github.com/osenrive/globantchallenge1.git
 
-- Ingresar al directorio del proyecto
+- Navegar al directorio de la clase principal del proyecto 
 
-  cd nombre-del-repositorio
+  path: src/main/java/org/poc/migration/MigrationApplication.java
 
-Compilar y ejecutar la aplicación
-./mvnw spring-boot:run
+- Actualizar las siguientes propiedades dentro del directorio: application.properties
+  
+  path: src/main/resources/application.properties
+
+  
+     spring.datasource.url=
+     
+     spring.datasource.name=
+     
+     spring.datasource.password=
+
+  
+- Lanzar la aplicación
 
 ## Endpoints
 
