@@ -1,6 +1,7 @@
 package org.poc.migration.service;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
@@ -13,15 +14,19 @@ import org.poc.migration.model.*;
 import org.poc.migration.repository.DepartmentRepository;
 import org.poc.migration.repository.HiredEmployeeRepository;
 import org.poc.migration.repository.JobRepository;
-import org.apache.avro.file.DataFileReader;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class BackupService {
+    private static final int batchSize = 500;
     private final HiredEmployeeRepository hiredEmployeeRepository;
     private final DepartmentRepository departmentRepository;
     private final JobRepository jobRepository;
@@ -59,10 +64,9 @@ public class BackupService {
     public String restoreData(String tableName) throws IOException {
         switch (tableName.toLowerCase()) {
             case "hired_employee":
-                //restoreFromAvro("hired_employees_backup.avro", hiredEmployeeRepository, HiredEmployee.class);
+                restoreFromHiredEmployeeAvro("hired_employees_backup.avro", hiredEmployeeRepository);
                 break;
             case "department":
-
                 restoreFromDepartmentAvro("deparments_backup.avro", departmentRepository);
                 break;
             case "job":
@@ -74,9 +78,50 @@ public class BackupService {
         return "Backup de la entidad: " + tableName + " restaurado";
     }
 
+    private <T> void restoreFromHiredEmployeeAvro(String fileName, HiredEmployeeRepository repository) throws IOException {
+        File file = new File("C:/Backup/" + fileName);
+        GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
+        List<HiredEmployee> hiredEmployeeList = new ArrayList<>();
+
+        try (DataFileReader<GenericRecord> dataFileReader = new DataFileReader<>(file, datumReader)) {
+            while (dataFileReader.hasNext()) {
+                GenericRecord record = dataFileReader.next();
+                HiredEmployee hiredEmployee = new HiredEmployee();
+
+                // Extraer datos del GenericRecord
+                if (record.get("id") != null) {
+                    hiredEmployee.setId((Long) record.get("id"));
+                }
+                if (record.get("name") != null) {
+                    hiredEmployee.setName(record.get("name").toString());
+                }
+                if (record.get("dateTime") != null) {
+                    Long timestamp = (Long) record.get("dateTime");
+                    LocalDateTime dateTime = Instant.ofEpochMilli(timestamp)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    hiredEmployee.setDateTime(dateTime);
+                }
+                if (record.get("departmentId") != null) {
+                    hiredEmployee.setDepartmentId((Long) record.get("departmentId"));
+                }
+                if (record.get("jobId") != null) {
+                    hiredEmployee.setJobId((Long) record.get("jobId"));
+                }
+                hiredEmployeeList.add(hiredEmployee);
+            }
+        }
+
+        for (int i = 0; i < hiredEmployeeList.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, hiredEmployeeList.size());
+            List<HiredEmployee> batchList = hiredEmployeeList.subList(i, end);
+            hiredEmployeeRepository.saveAll(batchList);
+            hiredEmployeeRepository.flush();
+        }
+    }
+
     private <T> void restoreFromDepartmentAvro(String fileName, DepartmentRepository repository) throws IOException {
         File file = new File("C:/Backup/" + fileName);
-        //SpecificDatumReader<T> datumReader = (SpecificDatumReader<T>) new SpecificDatumReader<>(clazz);
         GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
 
         try (DataFileReader<GenericRecord> dataFileReader = new DataFileReader<>(file, datumReader)) {
@@ -99,7 +144,6 @@ public class BackupService {
 
     private <T> void restoreFromJobsAvro(String fileName, JobRepository repository) throws IOException {
         File file = new File("C:/Backup/" + fileName);
-        //SpecificDatumReader<T> datumReader = (SpecificDatumReader<T>) new SpecificDatumReader<>(clazz);
         GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
 
         try (DataFileReader<GenericRecord> dataFileReader = new DataFileReader<>(file, datumReader)) {
