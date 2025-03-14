@@ -202,6 +202,5 @@ public class TransactionController {
         }
         job.setJobName(record[1]);
         return job;
-
     }
 }
