@@ -36,8 +36,8 @@ Compilar y ejecutar la aplicación
 ## Endpoints
 
 ***
+1. URL: http://localhost:8080/api/upload?entityName=hiredEmployee&filePath=C:/Users/oeriv/Desktop/hired_employees.csv
 
-1. URL: http://localhost:8080/api/upload?entityName=hiredEmployee&filePath=
    Método: POST
 
    Descripción: Mueve el archivo hired_employees.csv a la base de datos MySQL.
@@ -47,7 +47,7 @@ Compilar y ejecutar la aplicación
    Respuesta: Archivo procesado. Transaction ID: f32efada-660f-42ad-8cb3-ce46e1c064bd
 
 
-2. URL: http://localhost:8080/api/upload?entityName=department&filePath=
+2. URL: http://localhost:8080/api/upload?entityName=department&filePath=C:/Users/oeriv/Desktop/departments.csv
 
    Método: POST
 
@@ -58,7 +58,7 @@ Compilar y ejecutar la aplicación
    Respuesta: Archivo procesado. Transaction ID: 269af2c4-d430-4a06-a97b-c790efcabc04
 
 
-3. URL: http://localhost:8080/api/upload?entityName=job&filePath=
+3. URL: http://localhost:8080/api/upload?entityName=job&filePath=C:/Users/oeriv/Desktop/jobs.csv
 
    Método: POST
 
