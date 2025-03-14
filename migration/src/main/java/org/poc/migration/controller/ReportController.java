@@ -1,6 +1,7 @@
 package org.poc.migration.controller;
 
 import org.poc.migration.dto.HiredEmployeeReport;
+import org.poc.migration.dto.TopHiredByDepartmentsReport;
 import org.poc.migration.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +23,10 @@ public class ReportController {
     @GetMapping("/hiredEmployees")
     public List<HiredEmployeeReport> getHiredEmployees() {
         return reportService.getHiredEmployeeReport();
+    }
+
+    @GetMapping("/topHiredEmployees")
+    public List<TopHiredByDepartmentsReport> getTopHiredByEmployee() {
+        return reportService.getTopHiredByDepartment();
     }
 }
